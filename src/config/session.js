@@ -24,7 +24,7 @@ export function createSessionMiddleware({ store } = {}) {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: 'strict',
+      sameSite: env.COOKIE_SAME_SITE,
       secure: env.COOKIE_SECURE,
       maxAge: 86400000,
     },

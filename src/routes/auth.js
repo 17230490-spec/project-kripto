@@ -55,7 +55,7 @@ router.post('/logout', requireAuth, async (req, res, next) => {
       }
       res.clearCookie('connect.sid', {
         httpOnly: true,
-        sameSite: 'strict',
+        sameSite: env.COOKIE_SAME_SITE,
         secure: env.COOKIE_SECURE,
         path: '/',
       });

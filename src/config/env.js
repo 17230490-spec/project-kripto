@@ -27,6 +27,21 @@ function toBool(value, fallback) {
   return fallback;
 }
 
+const DEFAULT_CORS_ORIGINS = [
+  'https://fe-kripto.vercel.app',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+
+function parseOrigins(value) {
+  if (value === undefined || value === null || value === '') return DEFAULT_CORS_ORIGINS;
+  const origins = String(value)
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  return origins.length > 0 ? origins : DEFAULT_CORS_ORIGINS;
+}
+
 export function loadEnv(source = process.env) {
   const nodeEnv = source.NODE_ENV ?? 'development';
   const sessionSecret = source.SESSION_SECRET;
@@ -34,6 +49,7 @@ export function loadEnv(source = process.env) {
 
   const cookieSecure =
     nodeEnv === 'production' ? true : toBool(source.COOKIE_SECURE, false);
+  const cookieSameSite = nodeEnv === 'production' ? 'none' : 'lax';
 
   return {
     PORT: toInt(source.PORT, 3000),
@@ -46,6 +62,8 @@ export function loadEnv(source = process.env) {
     SESSION_SECRET: sessionSecret ?? 'dev-insecure-session-secret',
     STORAGE_PATH: source.STORAGE_PATH ? path.resolve(source.STORAGE_PATH) : defaultStoragePath,
     COOKIE_SECURE: cookieSecure,
+    COOKIE_SAME_SITE: cookieSameSite,
+    CORS_ORIGIN: parseOrigins(source.CORS_ORIGIN),
   };
 }
 

@@ -1,4 +1,5 @@
 import express from 'express';
+import { env } from './config/env.js';
 import { createSessionMiddleware } from './config/session.js';
 import { attachUser, requireAdmin, requireAuth } from './middleware/auth.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
@@ -12,8 +13,24 @@ import usersRouter from './routes/users.js';
 export function createApp(options = {}) {
   const app = express();
   app.disable('x-powered-by');
+  app.set('trust proxy', 1);
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
+    next();
+  });
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && env.CORS_ORIGIN.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      if (req.method === 'OPTIONS') {
+        res.status(204).end();
+        return;
+      }
+    }
     next();
   });
   app.use(express.json({ limit: '100kb' }));

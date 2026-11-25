@@ -20,5 +20,21 @@ describe('loadEnv', () => {
       COOKIE_SECURE: 'false',
     });
     expect(env.COOKIE_SECURE).toBe(true);
+    expect(env.COOKIE_SAME_SITE).toBe('none');
+  });
+
+  it('parses CORS_ORIGIN from comma separated values', () => {
+    const env = loadEnv({
+      NODE_ENV: 'test',
+      SESSION_SECRET: 'test-secret',
+      CORS_ORIGIN: 'https://a.example, https://b.example',
+    });
+    expect(env.CORS_ORIGIN).toEqual(['https://a.example', 'https://b.example']);
+    expect(env.COOKIE_SAME_SITE).toBe('lax');
+  });
+
+  it('falls back to default CORS origins when empty', () => {
+    const env = loadEnv({ NODE_ENV: 'test', SESSION_SECRET: 'test-secret' });
+    expect(env.CORS_ORIGIN).toContain('https://fe-kripto.vercel.app');
   });
 });
